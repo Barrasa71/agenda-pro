@@ -41,7 +41,7 @@ function createWindow() {
     mainWindow.loadURL(startUrl);
 
     if (process.env.NODE_ENV === 'development') {
-        mainWindow.webContents.openDevTools();
+        // mainWindow.webContents.openDevTools();
     }
 
     // Open external links in browser

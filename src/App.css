@@ -12,7 +12,8 @@
 
 * {
   box-sizing: border-box;
-  user-select: none; /* App-like feel */
+  user-select: none;
+  /* App-like feel */
 }
 
 body {
@@ -97,13 +98,13 @@ body {
 .nav-item.active {
   background: rgba(255, 255, 255, 0.8);
   color: var(--accent-color);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   font-weight: 600;
 }
 
 .sidebar-footer {
   margin-top: auto;
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   padding-top: 15px;
 }
 
@@ -112,17 +113,47 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.4); /* Subtle overlay */
+  overflow: hidden;
+  background: linear-gradient(135deg, #f3f4f6 0%, #eef2ff 100%);
+  position: relative;
+}
+
+/* Add a decorative orb/blur to make glass effect pop */
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.main-content::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .top-bar {
-  height: 70px; /* Aligned with Drag Region if needed */
+  height: 70px;
+  /* Aligned with Drag Region if needed */
   padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   /* Make header drag region for Electron */
   -webkit-app-region: drag;
+  position: relative;
+  z-index: 10;
 }
 
 .top-bar h1 {
@@ -132,8 +163,13 @@ body {
   color: var(--text-primary);
 }
 
-.actions button {
+.actions button,
+.date-controls button,
+.icon-btn-small,
+.text-btn-small {
   -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 20;
 }
 
 .icon-btn {
@@ -147,14 +183,41 @@ body {
 }
 
 .icon-btn:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--accent-color);
 }
 
 .content-scroll {
   flex: 1;
+  width: 100%;
+  /* Force full width */
   padding: 40px;
   overflow-y: auto;
+}
+
+.icon-btn-small {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #555;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn-small:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.text-btn-small {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--accent-color);
+  padding: 0 5px;
 }
 
 .placeholder-view {
@@ -166,4 +229,16 @@ body {
   color: #ccc;
   border: 2px dashed #e0e0e0;
   border-radius: 20px;
+}
+
+.calendar-full-width {
+  width: 100% !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  height: 100%;
 }

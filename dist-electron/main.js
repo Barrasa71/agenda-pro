@@ -34,7 +34,6 @@ function createWindow() {
   const startUrl = process.env.NODE_ENV === "development" ? "http://localhost:5175" : `file://${path.join(__dirname, "../dist/index.html")}`;
   mainWindow.loadURL(startUrl);
   if (process.env.NODE_ENV === "development") {
-    mainWindow.webContents.openDevTools();
   }
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("http")) {
