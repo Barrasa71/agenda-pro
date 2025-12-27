@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useReminders } from '../hooks/useReminders';
 import { Trash2, Calendar, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface RemindersManagerProps {
@@ -12,15 +12,19 @@ export const RemindersManager: React.FC<RemindersManagerProps> = ({ dateKey }) =
     const { reminders, addReminder, deleteReminder, activeAlerts } = useReminders(dateKey);
     const [newItem, setNewItem] = useState('');
     const [targetDate, setTargetDate] = useState('');
+    const [newTime, setNewTime] = useState('');
+    const [newDetails, setNewDetails] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [showList, setShowList] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newItem || !targetDate) return;
-        addReminder(newItem, targetDate);
+        addReminder(newItem, targetDate, newTime, newDetails);
         setNewItem('');
         setTargetDate('');
+        setNewTime('');
+        setNewDetails('');
         setShowForm(false);
     };
 
@@ -67,6 +71,7 @@ export const RemindersManager: React.FC<RemindersManagerProps> = ({ dateKey }) =
                                 <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>{reminder.text}</div>
                                 <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>
                                     {daysLeft === 0 ? <span style={{ color: '#e11d48', fontWeight: 'bold' }}>¡HOY es el día!</span> : `Faltan ${daysLeft} días`}
+                                    {reminder.time && <span style={{ marginLeft: '10px', fontWeight: 500 }}>⏰ {reminder.time}</span>}
                                 </div>
                             </div>
                         </div>
@@ -84,12 +89,27 @@ export const RemindersManager: React.FC<RemindersManagerProps> = ({ dateKey }) =
                         placeholder="Título del evento (ej. Reunión Anual)"
                         style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }}
                     />
+
+                    <textarea
+                        value={newDetails}
+                        onChange={e => setNewDetails(e.target.value)}
+                        placeholder="Detalles (opcional)..."
+                        rows={2}
+                        style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', resize: 'none', fontFamily: 'inherit' }}
+                    />
+
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <input
                             type="date"
                             value={targetDate}
                             onChange={e => setTargetDate(e.target.value)}
                             style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontFamily: 'inherit' }}
+                        />
+                        <input
+                            type="time"
+                            value={newTime}
+                            onChange={e => setNewTime(e.target.value)}
+                            style={{ width: '100px', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', fontFamily: 'inherit' }}
                         />
                         <button type="submit" style={{ background: '#8e44ad', color: 'white', border: 'none', borderRadius: '8px', padding: '0 20px', cursor: 'pointer', fontWeight: 600 }}>
                             Guardar
@@ -115,22 +135,32 @@ export const RemindersManager: React.FC<RemindersManagerProps> = ({ dateKey }) =
                 {showList && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
                         {reminders.length === 0 && <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>No hay recordatorios configurados.</span>}
-                        {reminders.sort((a, b) => parseISO(a.targetDate).getTime() - parseISO(b.targetDate).getTime()).map(r => (
-                            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-                                <div style={{ background: '#f5f3ff', padding: '6px', borderRadius: '6px' }}>
-                                    <Calendar size={14} color="#8b5cf6" />
+                        {reminders
+                            .filter(r => {
+                                const target = parseISO(r.targetDate);
+                                const current = parseISO(dateKey);
+                                // Show only if target date is today or in the future compared to the current view
+                                return differenceInCalendarDays(target, current) >= 0;
+                            })
+                            .sort((a, b) => parseISO(a.targetDate).getTime() - parseISO(b.targetDate).getTime())
+                            .map(r => (
+                                <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                                    <div style={{ background: '#f5f3ff', padding: '6px', borderRadius: '6px', marginTop: '2px' }}>
+                                        <Calendar size={14} color="#8b5cf6" />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <span style={{ display: 'block', fontSize: '0.9rem', color: '#334155', fontWeight: 500 }}>{r.text}</span>
+                                        {r.details && <span style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', whiteSpace: 'pre-wrap', marginBottom: '4px' }}>{r.details}</span>}
+                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                            {format(parseISO(r.targetDate), "d 'de' MMMM", { locale: es })}
+                                            {r.time && ` a las ${r.time}`}
+                                        </span>
+                                    </div>
+                                    <button onClick={() => deleteReminder(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: '4px' }}>
+                                        <Trash2 size={14} />
+                                    </button>
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <span style={{ display: 'block', fontSize: '0.9rem', color: '#334155', fontWeight: 500 }}>{r.text}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                        {format(parseISO(r.targetDate), "d 'de' MMMM", { locale: es })}
-                                    </span>
-                                </div>
-                                <button onClick={() => deleteReminder(r.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: '4px' }}>
-                                    <Trash2 size={14} />
-                                </button>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 )}
             </div>

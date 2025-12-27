@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { CheckCircle2, Circle, Trash2, Flag, Plus } from 'lucide-react';
+import { CheckCircle2, Circle, Trash2, Flag, FileText } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { format, parseISO } from 'date-fns';
 
 export interface Task {
     id: string;
     text: string;
+    details?: string;
     completed: boolean;
     date: string;
     priority: 'high' | 'normal' | 'low';
@@ -23,6 +24,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
 
     // UI State
     const [newTaskText, setNewTaskText] = useState('');
+    const [newTaskDetails, setNewTaskDetails] = useState('');
     const [priority, setPriority] = useState<'high' | 'normal' | 'low'>('normal');
     const [showForm, setShowForm] = useState(false);
 
@@ -155,6 +157,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
         const newTask: Task = {
             id: uuidv4(),
             text: newTaskText,
+            details: newTaskDetails.trim(),
             completed: false,
             date: dateKey,
             priority: priority
@@ -162,6 +165,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
 
         setTasks([...tasks, newTask]);
         setNewTaskText('');
+        setNewTaskDetails('');
         setPriority('normal');
         setShowForm(false);
     };
@@ -202,12 +206,13 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
                         if (onGoToDate) onGoToDate(targetDate);
                     }}
                     style={{
-                        color: '#3498db', fontWeight: 'bold', cursor: 'pointer', marginLeft: '5px',
-                        fontSize: '0.85em', background: '#eef2f7', padding: '2px 6px', borderRadius: '4px'
+                        color: '#3498db', fontWeight: 'bold', cursor: 'pointer', marginLeft: '8px',
+                        fontSize: '0.85em', background: '#eef2f7', padding: '2px 8px', borderRadius: '6px',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
                     }}
                     title="Ir a fecha origen"
                 >
-                    📅 {datePart}
+                    Desde el {datePart}
                 </span>
             </span>
         );
@@ -241,7 +246,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
 
             {showForm && (
                 <form onSubmit={addTask} style={{
-                    display: 'flex', gap: '10px', flexWrap: 'wrap',
+                    display: 'flex', gap: '10px', flexDirection: 'column',
                     background: 'white', padding: '15px', borderRadius: '16px',
                     border: '1px solid #e2e8f0', boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
                     animation: 'fadeIn 0.2s'
@@ -253,13 +258,31 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
                         placeholder="Escribe el nombre de la tarea..."
                         autoFocus
                         style={{
-                            flex: '1 1 100%',
+                            width: '100%',
                             padding: '12px 15px',
                             borderRadius: '12px',
                             border: '1px solid #cbd5e1',
                             outline: 'none',
                             fontSize: '1rem',
                             color: '#334155'
+                        }}
+                    />
+
+                    <textarea
+                        value={newTaskDetails}
+                        onChange={(e) => setNewTaskDetails(e.target.value)}
+                        placeholder="Detalles adicionales (opcional)..."
+                        rows={2}
+                        style={{
+                            width: '100%',
+                            padding: '12px 15px',
+                            borderRadius: '12px',
+                            border: '1px solid #cbd5e1',
+                            outline: 'none',
+                            fontSize: '0.9rem',
+                            color: '#334155',
+                            resize: 'none',
+                            fontFamily: 'inherit'
                         }}
                     />
 
@@ -311,7 +334,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
                         key={task.id}
                         className="task-item"
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '15px',
+                            display: 'flex', alignItems: 'flex-start', gap: '15px',
                             padding: '16px', borderRadius: '16px',
                             background: task.completed ? '#f1f5f9' : 'white',
                             border: task.completed ? '1px solid transparent' : '1px solid #f1f5f9',
@@ -332,25 +355,39 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ dateKey, onGoToDate })
                             }
                         }}
                     >
-                        <div onClick={() => toggleTask(task.id)} style={{ cursor: 'pointer', color: task.completed ? '#10b981' : '#cbd5e1', display: 'flex', alignItems: 'center' }}>
+                        <div onClick={() => toggleTask(task.id)} style={{ cursor: 'pointer', color: task.completed ? '#10b981' : '#cbd5e1', display: 'flex', alignItems: 'center', marginTop: '3px' }}>
                             {task.completed ? <CheckCircle2 size={24} fill="#d1fae5" /> : <Circle size={24} />}
                         </div>
 
-                        <span style={{
-                            flex: 1,
-                            textDecoration: task.completed ? 'line-through' : 'none',
-                            color: task.completed ? '#94a3b8' : '#334155',
-                            fontWeight: task.completed ? 400 : 500,
-                            fontSize: '1.05rem'
-                        }}>
-                            {renderTaskText(task.text)}
-                        </span>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{
+                                textDecoration: task.completed ? 'line-through' : 'none',
+                                color: task.completed ? '#94a3b8' : '#334155',
+                                fontWeight: task.completed ? 400 : 500,
+                                fontSize: '1.05rem'
+                            }}>
+                                {renderTaskText(task.text)}
+                            </span>
+                            {task.details && (
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    color: '#64748b',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '6px',
+                                    marginTop: '2px'
+                                }}>
+                                    <FileText size={14} style={{ marginTop: '3px' }} />
+                                    <span style={{ whiteSpace: 'pre-wrap' }}>{task.details}</span>
+                                </div>
+                            )}
+                        </div>
 
-                        <div style={{ background: '#f8fafc', padding: '6px', borderRadius: '8px' }}>
+                        <div style={{ background: '#f8fafc', padding: '6px', borderRadius: '8px', marginTop: '3px' }}>
                             <Flag size={16} color={getPriorityColor(task.priority)} fill={getPriorityColor(task.priority)} fillOpacity={0.2} />
                         </div>
 
-                        <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: '4px' }}>
+                        <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: '4px', marginTop: '3px' }}>
                             <Trash2 size={18} />
                         </button>
                     </div>

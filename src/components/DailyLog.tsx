@@ -47,11 +47,11 @@ export const DailyLog: React.FC<DailyLogProps> = ({ dateKey }) => {
                     flex: 1,
                     border: 'none',
                     padding: '0',
-                    fontSize: '1.2rem',
-                    fontFamily: '"Caveat", "Indie Flower", "Patrick Hand", cursive, sans-serif', // Handwritten style
-                    lineHeight: '30px', // Matches line height of parent
+                    fontSize: '1.4rem', // Slightly larger for calligraphy
+                    fontFamily: '"Dancing Script", "Caveat", cursive, sans-serif', // Calligraphy style
+                    lineHeight: '30px', // Matches line height
                     background: 'transparent',
-                    color: '#2c3e50',
+                    color: '#1e40af', // Ink Blue
                     resize: 'none',
                     outline: 'none',
                     boxShadow: 'none'

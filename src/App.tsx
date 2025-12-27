@@ -25,9 +25,9 @@ function App() {
     <div className="app-container">
       {/* Sidebar with Glassmorphism */}
       <aside className="sidebar">
-        <div className="brand">
-          <div className="logo-icon">📓</div>
-          <h2>Agenda Pro</h2>
+        <div className="sidebar-header">
+
+          <span className="app-title">Agenda Personal</span>
         </div>
 
         <nav className="nav-menu">
@@ -64,7 +64,20 @@ function App() {
           </button>
         </nav>
 
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <img
+            src="shield_final.png?v=full_width"
+            alt="Agenda Personal"
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+              mixBlendMode: 'multiply',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 65%, transparent 70%)',
+              maskImage: 'radial-gradient(circle at center, black 65%, transparent 70%)',
+              marginBottom: '10px'
+            }}
+          />
           <button className="nav-item">
             <Settings size={20} />
             <span>Configuración</span>
@@ -141,7 +154,7 @@ function App() {
                 ))}
               </div>
 
-              <div style={{ padding: '40px 40px 40px 70px' }}>
+              <div style={{ padding: '29px 40px 40px 70px' }}>
                 <div style={{ minHeight: '300px' }}>
                   <DailyLog dateKey={dateKey} />
                 </div>

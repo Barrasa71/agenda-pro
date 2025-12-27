@@ -6,17 +6,21 @@ export interface Reminder {
     id: string;
     text: string;
     targetDate: string; // YYYY-MM-DD
+    time?: string;      // HH:mm
+    details?: string;
     createdDate: string;
 }
 
 export function useReminders(currentDateKey: string) {
     const [reminders, setReminders] = useLocalStorage<Reminder[]>('agenda_reminders_all', []);
 
-    const addReminder = (text: string, targetDate: string) => {
+    const addReminder = (text: string, targetDate: string, time?: string, details?: string) => {
         const newReminder: Reminder = {
             id: uuidv4(),
             text,
             targetDate,
+            time,
+            details,
             createdDate: new Date().toISOString()
         };
         setReminders([...reminders, newReminder]);
